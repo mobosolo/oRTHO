@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html data-theme="nord">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Correction Orthographique</title>
+    <link rel="stylesheet" href="/src/output.css" />
+  </head>
+  <body class="m-5">
+    <h1 class="text-5xl text-primary font-bold text-center">oRTO</h1>
+    <form id="textForm" class="w-96 mx-auto">
+      <textarea
+        type="text"
+        id="inputText"
+        placeholder="Entrez votre texte ici..."
+        class="textarea textarea-primary w-full mt-10 mb-7"
+      ></textarea>
+      <br />
+      <button type="submit" class="btn btn-soft btn-primary w-full">
+        Corriger
+      </button>
+    </form>
+    <!-- carte de reponse -->
+    <div class="card w-96 bg-base-100 card-sm shadow-sm mx-auto my-7">
+      <div class="card-body">
+        <h2 class="card-title">Corrections</h2>
+        <p id="correctedText">Aucune correction pour le moment</p>
+        <div class="justify-end card-actions">
+          <svg
+            id="copySvg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6 cursor-pointer"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div
+      role="alert"
+      id="alertBox"
+      class="alert alert-success w-96 mx-auto hidden"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>Texte corrigé copié dans le presse-papiers !</span>
+    </div>
+
+    <script>
+      const form = document.getElementById("textForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const inputTextElement = document.getElementById("inputText");
+        const inputText = inputTextElement.value;
+
+        if (!inputText.trim()) {
+          inputTextElement.classList.add(
+            "textarea-error",
+            "focus:textarea-error"
+          );
+          inputTextElement.classList.remove("textarea-primary");
+          document.getElementById("correctedText").classList.add("text-error");
+          document.getElementById("correctedText").textContent =
+            "Veuillez entrer un texte avant de corriger.";
+          return;
+        }
+
+        // Réinitialiser le style si le champ n'est pas vide
+        inputTextElement.classList.remove(
+          "textarea-error",
+          "focus:textarea-error"
+        );
+        inputTextElement.classList.add("textarea-primary");
+
+        try {
+          const response = await fetch("http://localhost:3000/correct", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: inputText }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Erreur lors de la requête");
+          }
+
+          const data = await response.json();
+          document.getElementById("correctedText").textContent =
+            data.correctedText;
+          document.getElementById("inputText").value = "";
+        } catch (error) {
+          console.error(error);
+          document.getElementById("correctedText").textContent =
+            "Erreur lors de la correction du texte.";
+        }
+      });
+
+      const copySvg = document.getElementById("copySvg");
+      const alertBox = document.getElementById("alertBox");
+
+      copySvg.addEventListener("click", () => {
+        const correctedText =
+          document.getElementById("correctedText").textContent;
+
+        if (
+          correctedText &&
+          correctedText !== "Aucune correction pour le moment"
+        ) {
+          // Copier le texte corrigé dans le presse-papiers
+          navigator.clipboard
+            .writeText(correctedText)
+            .then(() => {
+              // Afficher la div d'alerte
+              alertBox.classList.remove("hidden");
+              setTimeout(() => {
+                alertBox.classList.add("hidden"); // Masquer la div après 3 secondes
+              }, 3000);
+            })
+            .catch((err) => {
+              console.error("Erreur lors de la copie du texte :", err);
+            });
+        }
+      });
+    </script>
+  </body>
+</html>
