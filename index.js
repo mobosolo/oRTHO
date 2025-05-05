@@ -2,18 +2,17 @@ import { config } from "dotenv";
 config();
 
 import { GoogleGenAI } from "@google/genai";
-import cors from "cors";
 import express from "express";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-// Initialiser GoogleGenAI avec la clé API
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Route POST pour corriger le texte
 app.post("/correct", async (req, res) => {
   try {
     const { text } = req.body; // Assurez-vous que le frontend envoie un corps JSON avec "text"
@@ -34,10 +33,14 @@ app.post("/correct", async (req, res) => {
   }
 });
 
+
 // Middleware pour gérer les routes non définies
 app.use((req, res) => {
   res.status(404).json({ error: "Route non définie." });
 });
 
-// Exporter l'application Express comme une fonction serverless
-export default app;
+// Démarrer le serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`);
+});
