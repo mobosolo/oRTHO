@@ -19,9 +19,6 @@ build/
 out/
 *.cache
 
-# Tailwind CSS
-*.css.map
-*.css
 
 # Environment variables
 .env
