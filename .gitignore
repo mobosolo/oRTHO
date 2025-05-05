@@ -1,4 +1,4 @@
-# Node.js
 node_modules/
-# Environment variables
+package-lock.json
+package.json
 .env

@@ -2,13 +2,26 @@ import { config } from "dotenv";
 config();
 
 import { GoogleGenAI } from "@google/genai";
+import { inject } from "@vercel/analytics";
 import cors from "cors";
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
+inject();
+
+// Recréer __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+// Configuration du serveur Express
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public"))); // Servir les fichiers statiques
 
 // Initialiser GoogleGenAI avec la clé API
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -37,5 +50,18 @@ app.post("/correct", async (req, res) => {
   }
 });
 
-// Exporter l'application Express comme une fonction serverless
-export default app;
+// Route par défaut pour servir index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Middleware pour gérer les routes non définies
+app.use((req, res) => {
+  res.status(404).json({ error: "Route non définie." });
+});
+
+// Démarrer le serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`);
+});

@@ -92,7 +92,7 @@
         inputTextElement.classList.add("textarea-primary");
 
         try {
-          const response = await fetch("/api/correct", {
+          const response = await fetch("/correct", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: inputText }),
