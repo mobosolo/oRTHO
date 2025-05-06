@@ -39,7 +39,7 @@ app.post("/correct", async (req, res) => {
       contents: text,
       config: {
         systemInstruction:
-          "Tu es un correcteur orthographique. tu recois un texte et tu corrige les fautes",
+          "Tu es un correcteur orthographique. tu recois un texte et tu corrige les fautes. Tu ne dois sortir que la correction du texte",
       },
     });
 
